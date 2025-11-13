@@ -5,6 +5,8 @@ pipeline {
         IMAGE_NAME = 'morosidad-api'
         IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_REGISTRY = 'localhost:5000'
+	PYTHON_PATH = 'C:\\Users\\mdcme\\AppData\\Local\\Programs\\Python\\Python312'
+        PATH = "${env.PYTHON_PATH};${env.PYTHON_PATH}\\Scripts;${env.PATH}"
     }
     
     stages {
