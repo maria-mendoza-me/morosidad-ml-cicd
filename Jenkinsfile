@@ -14,36 +14,21 @@ pipeline {
             }
         }
 
-        stage('Check Python') {
-            steps {
-                sh '''
-                    echo "=== Verificando Python en el agente ==="
-                    PYEXEC=$(command -v python3 || command -v python) || true
-                    if [ -z "$PYEXEC" ]; then
-                      echo "ERROR: no se encontró python3 ni python en el agente."
-                      echo "Instala Python o usa un agent con Python o ejecuta las etapas dentro de un contenedor python."
-                      exit 1
-                    fi
-                    echo "Usando: $PYEXEC -> $($PYEXEC --version 2>/dev/null || true)"
-                '''
-            }
-        }
-
         stage('Setup Python') {
+            agent { docker { image 'python:3.11-slim' } }
             steps {
                 sh '''
-                    PYEXEC=$(command -v python3 || command -v python) || { echo "No python disponible"; exit 1; }
-                    $PYEXEC -m pip install --upgrade pip
-                    $PYEXEC -m pip install -r requirements_d.txt
+                    python -m pip install --upgrade pip
+                    pip install -r requirements_d.txt
                 '''
             }
         }
 
         stage('Run Tests') {
+            agent { docker { image 'python:3.11-slim' } }
             steps {
                 sh '''
-                    PYEXEC=$(command -v python3 || command -v python) || { echo "No python disponible"; exit 1; }
-                    $PYEXEC -m pytest tests/ -v --junitxml=test-results.xml
+                    pytest tests/ -v --junitxml=test-results.xml
                 '''
             }
             post {
@@ -54,10 +39,10 @@ pipeline {
         }
 
         stage('Train Model') {
+            agent { docker { image 'python:3.11-slim' } }
             steps {
                 sh '''
-                    PYEXEC=$(command -v python3 || command -v python) || { echo "No python disponible"; exit 1; }
-                    $PYEXEC src/train.py
+                    python src/train.py
                 '''
             }
         }
